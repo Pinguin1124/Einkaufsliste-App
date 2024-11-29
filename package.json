@@ -1,10 +1,10 @@
 {
   "name": "mobsyspr2",
   "version": "1.0.0",
-  "description": "��#\u0000 \u0000m\u0000o\u0000b\u0000s\u0000y\u0000s\u0000p\u0000r\u0000\r\u0000 \u0000",
+  "description": "mobsyspr2",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
