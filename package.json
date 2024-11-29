@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Adrien12GitHub/mobSysPr2/issues"
   },
-  "homepage": "https://github.com/Adrien12GitHub/mobSysPr2#readme"
+  "homepage": "https://github.com/Adrien12GitHub/mobSysPr2#readme",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
 }
