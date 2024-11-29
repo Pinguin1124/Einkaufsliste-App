@@ -19,5 +19,11 @@
   "homepage": "https://github.com/Adrien12GitHub/mobSysPr2#readme",
   "devDependencies": {
     "jest": "^29.7.0"
+  },
+  "jest": {
+    "testMatch": [
+      "**/app/src/test/**/*.[jt]s?(x)",
+      "**/?(*.)+(spec|test).[tj]s?(x)"
+    ]
   }
 }
