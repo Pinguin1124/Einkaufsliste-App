@@ -1,13 +1,19 @@
+// ItemsAdapter.kt
 package com.example.mobsyspr2
+
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 
-class ItemsAdapter(private val itemsList: List<Item>) : RecyclerView.Adapter<ItemsAdapter.ItemViewHolder>() {
+class ItemsAdapter(
+    private val itemsList: List<Item>,
+    private val listId: String // ID der Liste
+) : RecyclerView.Adapter<ItemsAdapter.ItemViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_layout, parent, false)
@@ -19,7 +25,6 @@ class ItemsAdapter(private val itemsList: List<Item>) : RecyclerView.Adapter<Ite
         holder.tvProdukt.text = item.produkt
         holder.tvMenge.text = item.menge.toString()
         holder.tvNotiz.text = item.notizen
-
         holder.btnDelete.setOnClickListener {
             deleteItemFromFirebase(item.id)
         }
@@ -28,7 +33,9 @@ class ItemsAdapter(private val itemsList: List<Item>) : RecyclerView.Adapter<Ite
     override fun getItemCount(): Int = itemsList.size
 
     private fun deleteItemFromFirebase(itemId: String) {
-        FirebaseDatabase.getInstance().getReference("Einkaufsliste")
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        FirebaseDatabase.getInstance().getReference("users").child(userId).child("lists").child(listId).child("items")
             .child(itemId)
             .removeValue()
             .addOnSuccessListener {

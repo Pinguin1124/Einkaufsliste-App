@@ -1,14 +1,15 @@
+// HomeActivity.kt
 package com.example.mobsyspr2
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.mobsyspr2.databinding.ActivityHomeBinding
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
-import android.widget.Toast
-import android.util.Log
-
 
 class HomeActivity : AppCompatActivity() {
 
@@ -16,19 +17,29 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var binding: ActivityHomeBinding
     private lateinit var itemsAdapter: ItemsAdapter
     private val itemsList = mutableListOf<Item>()
+    private lateinit var listId: String // ID der ausgewählten Liste
+    private lateinit var auth: FirebaseAuth
+    private lateinit var userId : String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // ListId aus dem Intent holen
+        listId = intent.getStringExtra("listId") ?: run {
+            Toast.makeText(this, "Keine ListId gefunden!", Toast.LENGTH_SHORT).show()
+            finish() // Activity schließen, wenn keine ListId vorhanden
+            return
+        }
+
         binding.recyclerViewItems.layoutManager = LinearLayoutManager(this)
-        itemsAdapter = ItemsAdapter(itemsList)
+        itemsAdapter = ItemsAdapter(itemsList, listId) // ListId an den Adapter übergeben
         binding.recyclerViewItems.adapter = itemsAdapter
 
-
-        database = FirebaseDatabase.getInstance().getReference("Einkaufsliste")
-
+        auth = FirebaseAuth.getInstance()
+        userId = auth.currentUser?.uid ?: ""
+        database = FirebaseDatabase.getInstance().getReference("users").child(userId).child("lists").child(listId)
 
         fetchItems()
 
@@ -36,6 +47,7 @@ class HomeActivity : AppCompatActivity() {
             val produkt = binding.etProdukt.text.toString()
             val menge = binding.etMenge.text.toString().toIntOrNull() ?: 0
             val notiz = binding.etNotiz.text.toString()
+
             if (produkt.isNotEmpty() && menge > 0) {
                 addItemToFirebase(produkt, menge, notiz)
             } else {
@@ -45,7 +57,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun fetchItems() {
-        database.addValueEventListener(object : ValueEventListener {
+        database.child("items").addValueEventListener(object : ValueEventListener {
             @SuppressLint("NotifyDataSetChanged")
             override fun onDataChange(snapshot: DataSnapshot) {
                 itemsList.clear()
@@ -67,12 +79,8 @@ class HomeActivity : AppCompatActivity() {
         })
     }
 
-
-
-
-
     private fun addItemToFirebase(produkt: String, menge: Int, notiz: String) {
-        val newItemId = database.child("Einkaufsliste").push().key ?: return
+        val newItemId = database.child("items").push().key ?: return
         val newItem = mapOf(
             "id" to newItemId,
             "id_kategorie" to 1,
@@ -81,9 +89,7 @@ class HomeActivity : AppCompatActivity() {
             "produkt" to produkt
         )
 
-        FirebaseDatabase.getInstance().getReference("Einkaufsliste")
-            .child(newItemId)
-            .setValue(newItem)
+        database.child("items").child(newItemId).setValue(newItem)
             .addOnSuccessListener {
                 toast("Eintrag erfolgreich hinzugefügt")
             }
@@ -91,9 +97,6 @@ class HomeActivity : AppCompatActivity() {
                 toast("Fehler beim Hinzufügen: ${e.message}")
             }
     }
-
-
-
 
     private fun toast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()

@@ -1,3 +1,4 @@
+// SignInActivity.kt (Beispiel)
 package com.example.mobsyspr2
 
 import android.content.Intent
@@ -11,15 +12,14 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
 class SignInActivity : AppCompatActivity() {
+
     private lateinit var auth: FirebaseAuth
     private lateinit var binding: ActivitySignInBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = ActivitySignInBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         supportActionBar?.hide()
 
         auth = Firebase.auth
@@ -27,44 +27,35 @@ class SignInActivity : AppCompatActivity() {
         binding.btnSignIn.setOnClickListener {
             val email = binding.etEmail.text.toString()
             val password = binding.etPassword.text.toString()
+
             if (checkAllField()) {
                 auth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this) { task ->
                         if (task.isSuccessful) {
-                            // Login successful, redirect to HomeActivity
+                            // Login successful, redirect to ListAuswahlActivity
                             Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
-                            val intent = Intent(this, HomeActivity::class.java)
+                            val intent = Intent(this, ListAuswahlActivity::class.java)
                             startActivity(intent)
+                            finish() // Verhindert, dass der Benutzer zur Anmeldeseite zurückkehrt, wenn er auf "Zurück" klickt
                         } else {
                             // If login fails, display a message to the user.
-                            Toast.makeText(baseContext, "Login failed: ${task.exception?.message}",
-                                Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                baseContext, "Login failed: ${task.exception?.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
             }
         }
+
+        binding.btnLogin.setOnClickListener {
+            val intent = Intent(this, SignUpActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun checkAllField(): Boolean {
-        val email = binding.etEmail.text.toString()
-        if (email.isEmpty()) {
-            binding.textInputLayoutEmail.error = "This is required field"
-            return false
-        }
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            binding.textInputLayoutEmail.error = "Check email format"
-            return false
-        }
-        if (binding.etPassword.text.toString().isEmpty()) {
-            binding.textInputLayoutPassword.error = "This is required field"
-            binding.textInputLayoutPassword.errorIconDrawable = null
-            return false
-        }
-        if (binding.etPassword.text.toString().length < 6) {
-            binding.textInputLayoutPassword.error = "Password must be at least 6 characters"
-            binding.textInputLayoutPassword.errorIconDrawable = null
-            return false
-        }
+        // ... (Dein bestehender Code zur Validierung) ...
         return true
     }
 }

@@ -1,5 +1,5 @@
 [versions]
-agp = "8.6.0"
+agp = "8.7.3"
 appcompatVersion = "1.x.x"
 firebaseBom = "33.5.1"
 firebaseDatabase = "21.0.0"
